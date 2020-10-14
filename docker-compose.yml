@@ -1,0 +1,19 @@
+version: '3'
+services:
+
+  backend:
+      image: azsearchjuba.azurecr.io/azsearch-api
+      container_name: backend_azsearch
+      ports:
+        - 5000:5000
+      environment:
+        - PROD=${PROD}
+        - AZ_SEARCH_APIKEY=${AZ_SEARCH_APIKEY}
+        - AZ_SEARCH_URL=${AZ_SEARCH_URL}
+        - AZ_SEARCH_APIVERSION:2020-06-30
+
+  frontend:
+    image: azsearchjuba.azurecr.io/azsearch-app
+    container_name: frontend_azsearch
+    ports:
+      - 8080:8080

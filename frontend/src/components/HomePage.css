@@ -1,0 +1,18 @@
+.title {
+    height: 30%;
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    /*max-width: 400px;*/
+}
+
+.subtitle {
+    display: -webkit-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    /*max-width: 300px;*/
+}
