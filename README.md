@@ -1,1 +1,1 @@
-# Azure Search WebApp
+# Cloud Search WebApp
