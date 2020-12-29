@@ -4,6 +4,20 @@ import {ListGroupItem, Button, Modal, ModalHeader, ModalBody, ModalFooter} from 
 export const render_list = (index, data, index_format, i, modal, toggle) => {
 
     const saveText = (text, filename) => {
+
+        text = text.replace(/<p[^>]*>/g, "\n\n").replace(/<u[^>]*>/g, "\n").replace(/<[^>]*>/g, "")
+            .replaceAll("&amp;", "&")
+            .replaceAll("&quot;", "\"").replaceAll("&ldquo;", "\"").replaceAll("&rdquo;", "\"")
+            .replaceAll("&ordm;", "°").replaceAll("&deg;", "°")
+            .replaceAll("&nbsp;", " ").replaceAll("&#9;", "\n")
+            .replaceAll("&Agrave;", "Á").replaceAll("&Aacute;", "Á").replaceAll("&agrave;", "á").replaceAll("&aacute;", "á")
+            .replaceAll("&Egrave;", "É").replaceAll("&Eacute;", "É").replaceAll("&egrave;", "é").replaceAll("&eacute;", "é")
+            .replaceAll("&Igrave;", "Í").replaceAll("&Iacute;", "Í").replaceAll("&igrave;", "í").replaceAll("&iacute;", "í")
+            .replaceAll("&Ograve;", "Ó").replaceAll("&Oacute;", "Ó").replaceAll("&ograve;", "ó").replaceAll("&oacute;", "ó")
+            .replaceAll("&Ugrave;", "Ú").replaceAll("&Uacute;", "Ú").replaceAll("&ugrave;", "ú").replaceAll("&uacute;", "ú")
+            .replaceAll("&ntilde;", "ñ").replaceAll("&Ntilde;", "Ñ")
+            .replace(/&.*;/g, "");
+
         var data = new Blob([text], {type: 'application/msword'});
         var textFile = window.URL.createObjectURL(data);
         if (document.getElementById('download') !== null) {
@@ -13,10 +27,14 @@ export const render_list = (index, data, index_format, i, modal, toggle) => {
         a.setAttribute("id", "download");
         a.setAttribute("href", textFile);
         a.setAttribute("download", filename);
-        a.textContent = "Click here to download the test for the students";
+        a.setAttribute("hidden", true);
         a.click();
         window.URL.revokeObjectURL(textFile);
         document.body.appendChild(a);
+    }
+
+    const is_hidden = (field) => {
+        return field === null || field === '' || typeof field === 'undefined'
     }
 
 
@@ -26,26 +44,43 @@ export const render_list = (index, data, index_format, i, modal, toggle) => {
             <div>
                 <h6 hidden={index_format[index].pretitle.length === 0}>
                     {index_format[index].pretitle.map((value, idx1) =>
-                        <p className="text-muted" key={idx1}>{value + ': '}<b>{data[value]}</b></p>
+                        <p className="text-muted"
+                           key={idx1}
+                           hidden={is_hidden(data[value])}
+                        >
+                            {index_format[index].pretitle_name[idx1] + ': '}<b>{data[value]}</b>
+                        </p>
                     )}
 
                 </h6>
-                <h3 className="title">{data[index_format[index].title] || 'Sin titulo'}</h3>
-                <h5 className="text-muted">{data[index_format[index].subtitle] || 'Sin subtitulo'}:</h5>
+                <h5 className="-" hidden={is_hidden(data[index_format[index].title])}>
+                    <small className="text-muted">{index_format[index].title_name}:<br/></small>{data[index_format[index].title]}
+                </h5>
+                <h6 className="-" hidden={is_hidden(data[index_format[index].subtitle])}>
+                    <small className="text-muted">{index_format[index].subtitle_name}:<br/></small>{data[index_format[index].subtitle]}
+                </h6>
             </div>
 
             <div>
-                <Button className="my-2" color="danger" onClick={__toggle}>{index_format[index].text}</Button>
+                <Button className="my-2"
+                        color="danger"
+                        outline={true}
+                        disabled={is_hidden(data[index_format[index].text])}
+                        onClick={__toggle}>{index_format[index].text_name}</Button>
 
                 <p hidden={index_format[index].footer.length === 0}>
                     {index_format[index].footer.map((value, idx2) =>
-                        <small key={idx2}>{value + ': '}<b>{data[value]}</b><br/></small>
+                        <small key={idx2}
+                               hidden={is_hidden(data[value])}
+                        >
+                            {index_format[index].footer_name[idx2] + ': '}<b>{data[value]}</b><br/>
+                        </small>
                     )}
                 </p>
 
                 <hr className="ml-0 pl-0 col-3"/>
 
-                <p className="mt-3 text-muted" hidden={index_format[index].date === ''}>
+                <p className="mt-3 text-muted" hidden={is_hidden(index_format[index].date)}>
                     <small>{'Fecha: ' + data[index_format[index].date].split('T')[0]}</small>
                 </p>
             </div>
@@ -53,9 +88,9 @@ export const render_list = (index, data, index_format, i, modal, toggle) => {
             <div className="col-10 my-4">
                 <Modal centered={true} size="lg" className="p-0 m-auto" isOpen={modal === index + i.toString()}
                        toggle={__toggle}>
-                    <ModalHeader toggle={__toggle}>Texto</ModalHeader>
+                    <ModalHeader toggle={__toggle}>{index_format[index].text_name}</ModalHeader>
                     <ModalBody>
-                        <div dangerouslySetInnerHTML={{ __html: data[index_format[index].text]}} />
+                        <div id='body-text' dangerouslySetInnerHTML={{ __html: data[index_format[index].text]}} />
                         {/*{data[index_format[index].text]}*/}
                     </ModalBody>
                     <ModalFooter>

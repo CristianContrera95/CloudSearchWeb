@@ -19,11 +19,11 @@ export default class AzSearchAPI {
     }
 
     set_indexes_selected(indexes) {
-        localStorage.setItem('__indexes', indexes);
+        sessionStorage.setItem('__indexes_selected', JSON.stringify(indexes));
     }
 
     get_indexes_selected() {
-        return localStorage.getItem('__indexes');
+        return  JSON.parse(sessionStorage.getItem('__indexes_selected'));
     }
 
     get_index_format(index_name) {
@@ -43,8 +43,9 @@ export default class AzSearchAPI {
         return this._post_fetch(requestURL, init, 'save_index_format');
     }
 
-    get_indexes() {
-        let requestURL = this.domain + 'get_index';
+    get_indexes(all) {
+        all = typeof all !== 'undefined' ? '?all=true' : ''
+        let requestURL = this.domain + 'get_index' + all;
         return this._get_fetch(requestURL, this.headers, 'get_indexes');
     }
 
@@ -96,6 +97,19 @@ export default class AzSearchAPI {
         let requestURL = this.domain + 'next';
 
         return this._post_fetch(requestURL, init, 'next');
+    }
+
+    check_password(password) {
+        let init = {
+            headers: this.headers,
+            method: 'POST',
+            body: JSON.stringify({
+                password: password,
+            })}
+
+        let requestURL = this.domain + 'password';
+
+        return this._post_fetch(requestURL, init, 'password');
     }
 
     create_data_source(body) {

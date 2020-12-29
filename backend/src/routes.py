@@ -3,7 +3,8 @@ from views import (
     AutoComplete,
     Search,
     Next,
-    IndexFormat
+    IndexFormat,
+    Password
 )
 
 
@@ -33,5 +34,10 @@ urls = [
         'resource': IndexFormat,
         'path': '/index_format',
         'endpoint': 'index_format',
+    },
+    {
+        'resource': Password,
+        'path': '/password',
+        'endpoint': 'password',
     }
 ]

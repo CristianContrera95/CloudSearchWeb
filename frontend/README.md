@@ -1,4 +1,4 @@
-# Cloud Search WebApp
+# Azure Search WebApp
 
 - Author: **Cristian Contrera** ***<cristiancontrera95@gmail.com>***
 

@@ -22,7 +22,7 @@ const InputField = ({name, label, type, value, id, ft, i, change, ph, maxlength,
 
     return (
         <FormGroup className="mx-auto">
-            <Label size="lg" for={id || name} >{label}</Label>
+            <Label size="lg" for={id || name} hidden={typeof label === 'undefined'}>{label}</Label>
             <InputGroup>
                 <Input maxLength={maxlength} type={type} name={name} id={id || name}
                        value={value}
@@ -63,14 +63,14 @@ class InputFieldQuery extends Component {
                 <div>
                     <UncontrolledCollapse toggler="#toggler">
                         <Row className="ml-5 pl-5">
-                            {Object.keys(this.props.indexes).map((index_value, idx) =>
-                                <Col className="col-4" key={idx}>
+                            {Object.keys(this.props.indexes).sort().map((index_value, idx) =>
+                                <Col className="col-4" key={idx} hidden={this.props.indexes[index_value]["hidden"]}>
                                     <Input type="checkbox"
                                            value={index_value}
                                            onChange={this.props.change_index}
                                            id={idx.toString()}
                                            key={idx}
-                                           checked={this.props.indexes_selected.indexOf(index_value) >= 0}
+                                           checked={(this.props.indexes_selected.indexOf(index_value) >= 0) && (!this.props.indexes[index_value]["hidden"])}
                                            disabled={this.props.indexes[index_value]["name"] === ''}
                                     />
                                     <Label for={idx.toString()} check>

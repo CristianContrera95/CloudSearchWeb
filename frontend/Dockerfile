@@ -10,13 +10,14 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 # install app dependencies
 COPY package.json .
+RUN npm install -g npm
 RUN npm cache clean --force
 RUN npm i
 
+RUN npm install -g serve
+
 # add app
 COPY build build
-
-RUN npm install -g serve
 
 # expose port that npm server use
 EXPOSE 8080

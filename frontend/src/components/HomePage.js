@@ -14,7 +14,21 @@ import './HomePage.css';
 import {render_list} from '../data/IndexFields';
 
 
-const index_format = {'name': '', 'pretitle': [], 'title': '', 'subtitle': '', 'text': '', 'footer': [], 'date': ''};
+const index_format = {
+    'name': '',
+    'pretitle_name': [],
+    'pretitle': [],
+    'title_name': '',
+    'title': '',
+    'subtitle_name': '',
+    'subtitle': '',
+    'text_name': '',
+    'text': '',
+    'footer_name': [],
+    'footer': [],
+    'date': '',
+    'hidden': false
+};
 
 
 class HomePage extends Component {
@@ -63,8 +77,12 @@ class HomePage extends Component {
     getIndexFormat(index_name) {
         let __index_format = this.az_search.get_index_format(index_name)
                                 .then(res => {
-                                    if (typeof res.index_format !== 'undefined') {
-                                        return res.index_format;
+                                    let __index_fmt = {...index_format};
+                                    if ((typeof res.index_format !== 'undefined')) {
+                                        Object.keys(res.index_format).map(key =>
+                                            __index_fmt[key] = res.index_format[key]
+                                        )
+                                        return __index_fmt;
                                     }
                                     else
                                         return index_format;
@@ -80,7 +98,6 @@ class HomePage extends Component {
         this.az_search.get_indexes()
             .then(res => {
                 if (res.value.length > 0) {
-
                     let __indexes = {}, __filter_results = {}, __filter_collapse = {};
                     res.value.forEach((index_value) => {
                         __indexes[index_value.name] = [...index_value.fields.map(field => field.name)];
@@ -97,14 +114,15 @@ class HomePage extends Component {
                             });
                             // __fields_selected[value.name] = [];
                     });
+                    let __indexes_selected = this.az_search.get_indexes_selected()
                     this.setState({
                         indexes: __indexes,
                         filter_collapse: __filter_collapse,
-                        indexes_selected: [res.value[0].name],
+                        indexes_selected: __indexes_selected === null ? [] : [...__indexes_selected],
                         filter_results: __filter_results,
                         // fields_selected: __fields_selected,
                         non_index: false,
-                        search_disabled: false,
+                        search_disabled: __indexes_selected === null ? true : __indexes_selected.length === 0
                     });
                 } else
                     this.setState({
@@ -285,19 +303,20 @@ class HomePage extends Component {
     }
 
     onSelectIndex(e) {
+        let __indexes_selected = this.state.indexes_selected;
         let index_name = e.target.value;
-        let idx = this.state.indexes_selected.indexOf(index_name);
+        let idx = __indexes_selected.indexOf(index_name);
+
         if (idx < 0)
-            this.setState({
-                indexes_selected: [...this.state.indexes_selected, index_name]
-            })
-        else {
-            let indexes = this.state.indexes_selected;
-            indexes.splice(idx, 1);
-            this.setState({
-                indexes_selected: indexes
-            })
-        }
+            __indexes_selected = [...__indexes_selected, index_name];
+        else
+            __indexes_selected.splice(idx, 1);
+
+        this.setState({
+            indexes_selected: __indexes_selected,
+            search_disabled: __indexes_selected.length === 0
+        })
+        this.az_search.set_indexes_selected(__indexes_selected);
     }
 
     isChecked(index_key, field) {

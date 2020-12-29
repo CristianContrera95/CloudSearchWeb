@@ -5,7 +5,7 @@ import requests as r
 from flask import request
 from flask_restful import Resource
 from flask_cors import cross_origin
-from config import HEADERS, AZ_SEARCH_ENDPOINT, AZ_SEARCH_APIVERSION, INDEXES_FILE
+from config import HEADERS, AZ_SEARCH_ENDPOINT, AZ_SEARCH_APIVERSION, INDEXES_FILE, AZ_SEARCH_APIKEY
 
 
 class GetIndex(Resource):
@@ -15,10 +15,22 @@ class GetIndex(Resource):
 
     @cross_origin()
     def get(self):
+        a = request
+        all = request.args.get('all', False)
         url = AZ_SEARCH_ENDPOINT + 'indexes?api-version=' + AZ_SEARCH_APIVERSION  # + '&$select=name'
         res = r.get(url, headers=HEADERS)
         if res.ok:
-            return res.json(), 200
+            results = res.json()
+
+            if os.path.exists(INDEXES_FILE):
+                with open(INDEXES_FILE, 'rb') as fp:
+                    indexes_dict = pickle.load(fp)
+
+            results['value'] = list(sorted(results['value'], key=lambda x: x['name']))
+            if not all:
+                results['value'] = list(filter(lambda x: not indexes_dict[x['name']].get('hidden', False), results['value']))
+
+            return results, 200
         return {}, 404
 
 
@@ -73,7 +85,6 @@ class Search(Resource):
         url = AZ_SEARCH_ENDPOINT + 'indexes/' + index + '/docs?api-version=' + AZ_SEARCH_APIVERSION \
             + '&search=' + query + facets + _filter + '&$top=' + top
             # +'&$select=' + ','.join(self.select_list)
-        print(url)
         res = r.get(url, headers=HEADERS)
         if res.ok:
             result = res.json()
@@ -101,10 +112,6 @@ class Next(Resource):
             next_url = __url + '&$skip=' + str(int(skip) + 15)
             previous_url = url
             url = previous_url
-
-        print(previous_url)
-        print(url)
-        print(next_url)
 
         res = r.get(url, headers=HEADERS)
         if res.ok:
@@ -152,3 +159,16 @@ class IndexFormat(Resource):
             return {'result': 'saved'}, 200
 
         return {'result': 'error'}, 400
+
+
+class Password(Resource):
+    def __init__(self):
+        super(Password, self).__init__()
+
+    @cross_origin()
+    def post(self):
+        password = json.loads(request.data.decode()).get('password', '')
+        if AZ_SEARCH_APIKEY == password:
+            return {'match': True}, 200
+
+        return {'match': False}, 200
